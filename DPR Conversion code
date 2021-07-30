@@ -1,0 +1,127 @@
+import eia
+import pandas as pd
+from functools import reduce
+
+
+import urllib.request
+dpr =https://www.eia.gov/petroleum/drilling/xls/dpr-data.xlsx
+urllib.request.urlretrieve(dpr, 'DPR.xls')
+
+duc =https://www.eia.gov/petroleum/drilling/xls/duc-data.xlsx
+urllib.request.urlretrieve(duc, 'DUC.xls')
+
+#File Path
+filePath = 'XXXX'
+fileName = 'DPR.xls'
+fileRoute = filePath + fileName 
+
+# Reading the excel file 
+excelFile = pd.ExcelFile(fileRoute)
+sheetList = excelFile.sheet_names
+
+#Permian
+Permian = excelFile.parse('Permian Region', header = None)
+Permian.iloc[1,4] = "Oil Production"
+Permian.iloc[1,7] = "Gas Production"
+Permian.columns = Permian.iloc[1]
+Permian = Permian.drop(Permian.index[0:2])
+Permian['Month'] = pd.to_datetime(Permian['Month'])
+
+#Anadarko
+Anadarko = excelFile.parse('Anadarko Region', header = None)
+Anadarko.iloc[1,4] = "Oil Production"
+Anadarko.iloc[1,7] = "Gas Production"
+Anadarko.columns = Anadarko.iloc[1]
+Anadarko = Anadarko.drop(Anadarko.index[0:2])
+Anadarko['Month'] = pd.to_datetime(Anadarko['Month'])
+
+#Appalachia
+Appalachia = excelFile.parse('Appalachia Region', header = None)
+Appalachia.iloc[1,4] = "Oil Production"
+Appalachia.iloc[1,7] = "Gas Production"
+Appalachia.columns = Appalachia.iloc[1]
+Appalachia = Appalachia.drop(Appalachia.index[0:2])
+Appalachia['Month'] = pd.to_datetime(Appalachia['Month'])
+
+#Bakken
+Bakken = excelFile.parse('Bakken Region', header = None)
+Bakken.iloc[1,4] = "Oil Production"
+Bakken.iloc[1,7] = "Gas Production"
+Bakken.columns = Bakken.iloc[1]
+Bakken = Bakken.drop(Bakken.index[0:2])
+Bakken['Month'] = pd.to_datetime(Bakken['Month'])
+
+#Haynesville
+Haynesville = excelFile.parse('Haynesville Region', header = None)
+Haynesville.iloc[1,4] = "Oil Production"
+Haynesville.iloc[1,7] = "Gas Production"
+Haynesville.columns = Haynesville.iloc[1]
+Haynesville = Haynesville.drop(Haynesville.index[0:2])
+Haynesville['Month'] = pd.to_datetime(Haynesville['Month'])
+
+#Niobrara
+Niobrara = excelFile.parse('Niobrara Region', header = None)
+Niobrara.iloc[1,4] = "Oil Production"
+Niobrara.iloc[1,7] = "Gas Production"
+Niobrara.columns = Niobrara.iloc[1]
+Niobrara = Niobrara.drop(Niobrara.index[0:2])
+Niobrara['Month'] = pd.to_datetime(Niobrara['Month'])
+
+#EF
+EagleFord = excelFile.parse('Eagle Ford Region', header = None)
+EagleFord.iloc[1,4] = "Oil Production"
+EagleFord.iloc[1,7] = "Gas Production"
+EagleFord.columns = EagleFord.iloc[1]
+EagleFord = EagleFord.drop(EagleFord.index[0:2])
+EagleFord['Month'] = pd.to_datetime(EagleFord['Month'])
+
+
+DPRProd = Permian[['Month']]
+
+DPRProd['Anadarko Production'] = Anadarko['Oil Production']
+DPRProd['Appalachia Production'] = Appalachia['Oil Production']
+DPRProd['Bakken Production'] = Bakken['Oil Production']
+DPRProd['EagleFord Production'] = EagleFord['Oil Production']
+DPRProd['Haynesville Production'] = Haynesville['Oil Production']
+DPRProd['Niobrara Production'] = Niobrara['Oil Production']
+DPRProd['Permian Production'] = Permian['Oil Production']
+
+
+DPRProd['Anadarko Gas Production'] = Anadarko['Gas Production']
+DPRProd['Appalachia Gas Production'] = Appalachia['Gas Production']
+DPRProd['Bakken Gas Production'] = Bakken['Gas Production']
+DPRProd['EagleFord Gas Production'] = EagleFord['Gas Production']
+DPRProd['Haynesville Gas Production'] = Haynesville['Gas Production']
+DPRProd['Niobrara Gas Production'] = Niobrara['Gas Production']
+DPRProd['Permian Gas Production'] = Permian['Gas Production']
+
+fileName = 'DUC.xls'
+fileRoute = filePath + fileName 
+
+# Reading the excel file 
+excelFile = pd.ExcelFile(fileRoute)
+sheetList = excelFile.sheet_names
+
+#Permian
+Completions = excelFile.parse('Data', header = None)
+
+Completions.iloc[3,2] = "Anadarko Comp"
+Completions.iloc[3,6] = "Appalachia Comp"
+Completions.iloc[3,10] = "Bakken Comp"
+Completions.iloc[3,14] = "EagleFord Comp"
+Completions.iloc[3,18] = "Haynesville Comp"
+Completions.iloc[3,22] = "Niobrara Comp"
+Completions.iloc[3,26] = "Permian Comp"
+Completions.iloc[3,0] = "Month"
+
+Completions.columns = Completions.iloc[3]
+Completions = Completions.drop(Completions.index[0:5])
+
+Completions = Completions[["Month","Anadarko Comp","Appalachia Comp","Bakken Comp","EagleFord Comp","Haynesville Comp","Niobrara Comp","Permian Comp"]]
+Completions['Month'] = pd.to_datetime(Completions['Month'])
+
+DPRProd = pd.merge(DPRProd, Completions, left_on ='Month', right_on = 'Month', how = 'left')
+
+df_final = DPRProd.set_index('Month')
+
+df_final.to_excel("DPR_Table.xlsx")
